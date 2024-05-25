@@ -4,7 +4,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
         DOCKER_IMAGE = 'yahav12321/k8stest:02'
         KUBERNETES_DEPLOYMENT = 'flask-app'
     }
