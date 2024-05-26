@@ -31,13 +31,14 @@ pipeline {
                 }
             }
         }
-stage('Deploy to Kubernetes') {
-    steps {
-        script {
-            def contextName = sh(script: "kubectl config view --minify --output 'jsonpath={.current-context}'", returnStdout: true).trim()
-            sh "kubectl config use-context $contextName"
-            sh "kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    def contextName = sh(script: "kubectl config view --minify --output 'jsonpath={.current-context}'", returnStdout: true).trim()
+                    sh "kubectl config use-context $contextName"
+                    sh "kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
+                }
+            }
         }
     }
 }
-
