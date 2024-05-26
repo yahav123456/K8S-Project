@@ -7,6 +7,7 @@ pipeline {
         DOCKER_IMAGE = "yahav12321/k8stest"
         kubeconfigId = "k8sconfigkube"
         VERSION = "${env.BUILD_NUMBER}"
+        KUBE_CONFIG = readFile('config.yaml')
     }
     
     stages {
@@ -15,6 +16,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${GIT_CREDENTIALS}"
             }
         }
+        
         stage('Build Docker Image') {
             steps {
                 script {
@@ -22,6 +24,7 @@ pipeline {
                 }
             }
         }
+        
         stage('Push to DockerHub') {
             steps {
                 script {
@@ -31,12 +34,12 @@ pipeline {
                 }
             }
         }
+        
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    def contextName = sh(script: "kubectl config view --minify --output 'jsonpath={.current-context}'", returnStdout: true).trim()
-                    sh "kubectl config use-context $contextName"
-                    sh "kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
+                    writeFile(file: 'config', text: "${env.KUBE_CONFIG}")
+                    sh "kubectl --kubeconfig=config set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
                 }
             }
         }
