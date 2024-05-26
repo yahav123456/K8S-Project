@@ -7,11 +7,9 @@ agent {
             spec:
               containers:
               - name: docker
-                image: mikefarah/yq:4.30.8
-                command:
-                - sleep
-                args:
-                - infinity
+                image: docker:20.10.23-dind
+                securityContext:
+                  privileged: true
                 volumeMounts:
                 - name: dockersock
                   mountPath: /var/run/docker.sock
