@@ -1,5 +1,31 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            label 'jenkins-slave'
+            defaultContainer 'jnlp'
+            yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    jenkins: slave
+spec:
+  containers:
+  - name: docker
+    image: docker:latest
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run/docker.sock
+  volumes:
+  - name: docker-socket
+    hostPath:
+      path: /var/run/docker.sock
+"""
+        }
+    }
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
@@ -17,26 +43,31 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
+                container('docker') {
+                    script {
+                        dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
+                    }
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-credentials') {
-                        dockerImage.push()
+                container('docker') {
+                    script {
+                        docker.withRegistry('', 'dockerhub-credentials') {
+                            dockerImage.push()
+                        }
                     }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                container('maven') {
+                container('docker') {
                     script {
                         sh """
-                        kubectl set image deployment/flask-app kind-control-plane=${DOCKER_IMAGE}:${VERSION} --record
+                        kubectl config use-context ${KUBERNETES_CONTEXT}
+                        kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record
                         """
                     }
                 }
