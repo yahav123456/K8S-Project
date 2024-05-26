@@ -1,28 +1,29 @@
 pipeline {
-    agent {
-        kubernetes {
-            yaml '''
-                apiVersion: v1
-                kind: Pod
-                spec:
-                  containers:
-                  - name: docker
-                    image: docker:dind
-                    env:
-                    - name: DOCKER_HOST
-                      value: tcp://localhost:2375
-                    securityContext:
-                      privileged: true
-                    volumeMounts:
-                    - name: dockersock
-                      mountPath: /var/run/docker.sock
-                  volumes:
-                  - name: dockersock
-                    hostPath:
-                      path: /var/run/docker.sock
-            '''
-        }
+agent {
+    kubernetes {
+        yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: docker
+                image: docker:dind
+                env:
+                - name: DOCKER_HOST
+                  value: tcp://localhost:2375
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - name: docker-sock
+                  mountPath: /var/run/docker.sock
+              volumes:
+              - name: docker-sock
+                hostPath:
+                  path: /var/run/docker.sock
+                  type: File
+        '''
     }
+}
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
