@@ -1,34 +1,14 @@
 pipeline {
-agent {
-    kubernetes {
-        yaml '''
-            apiVersion: v1
-            kind: Pod
-            spec:
-              containers:
-              - name: docker
-                image: docker:20.10.23-dind
-                securityContext:
-                  privileged: true
-                volumeMounts:
-                - name: dockersock
-                  mountPath: /var/run/docker.sock
-              volumes:
-              - name: dockersock
-                hostPath:
-                  path: /var/run/docker.sock
-        '''
-    }
-}
-
+    agent any
+    
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        GIT_CREDENTIALS = credentials('jenkins-github')
+        GIT_CREDENTIALS = 'jenkins-github'
         DOCKER_IMAGE = "yahav12321/k8stest"
-        KUBERNETES_CONTEXT = "kind-kind"
+        kubeconfigId = "k8sconfigkube"
         VERSION = "${env.BUILD_NUMBER}"
     }
-
+    
     stages {
         stage('Checkout') {
             steps {
@@ -37,32 +17,27 @@ agent {
         }
         stage('Build Docker Image') {
             steps {
-                container('docker') {
-                    script {
-                        dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}", '.')
-                    }
+                script {
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
-                container('docker') {
-                    script {
-                        docker.withRegistry('', 'dockerhub-credentials') {
-                            dockerImage.push()
-                        }
+                script {
+                    docker.withRegistry('', 'dockerhub-credentials') {
+                        dockerImage.push()
                     }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                container('docker') {
-                    script {
-                        sh """
-                        kubectl set image deployment/flask-app kind-control-plane=${DOCKER_IMAGE}:${VERSION} --record
-                        """
-                    }
+                script {
+                    sh """
+                    kubectl config use-context ${kubeconfigId}
+                    kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record
+                    """
                 }
             }
         }
