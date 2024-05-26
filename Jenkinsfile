@@ -1,32 +1,31 @@
-// Jenkinsfile
-
 pipeline {
     agent any
     
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('docker-hub-credentials')
-        DOCKER_IMAGE = 'yahav12321/k8stest:02'
-        KUBERNETES_DEPLOYMENT = 'flask-app'
-    }
-
-    triggers {
-        githubPush()
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKER_IMAGE = "yahav12321/k8stest"
+        KUBERNETES_CONTEXT = "kind-kind"
+        VERSION = "${env.BUILD_NUMBER}"
     }
     
     stages {
-        stage('Build') {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/yourusername/yourrepository.git'
+            }
+        }
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE .'
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        sh 'docker push $DOCKER_IMAGE'
+                    docker.withRegistry('', 'dockerhub-credentials') {
+                        dockerImage.push()
                     }
                 }
             }
@@ -34,10 +33,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh '''
-                    kubectl set image deployment/$KUBERNETES_DEPLOYMENT $KUBERNETES_DEPLOYMENT=$DOCKER_IMAGE --record
-                    kubectl rollout status deployment/$KUBERNETES_DEPLOYMENT
-                    '''
+                    sh """
+                    kubectl set image deployment/your-deployment your-container=${DOCKER_IMAGE}:${VERSION} --record
+                    """
                 }
             }
         }
