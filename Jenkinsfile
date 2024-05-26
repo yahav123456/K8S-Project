@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                    kubectl config use-context ${kubeconfigId}
+                    kubectl config use-context: kubeConfig: [path: ''], kubeconfigId: 'k8sconfigkube', secretName: '', ssh: [sshCredentialsId: '*', sshServer: ''], textCredentials: [certificateAuthorityData: '', clientCertificateData: '', clientKeyData: '', serverUrl: 'https://']
                     kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record
                     """
                 }
