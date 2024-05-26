@@ -1,32 +1,32 @@
-// Jenkinsfile
-
 pipeline {
     agent any
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        DOCKER_IMAGE = 'yahav12321/k8stest:02'
-        KUBERNETES_DEPLOYMENT = 'flask-app'
-    }
-
-    triggers {
-        githubPush()
+        GIT_CREDENTIALS = 'jenkins-github'
+        DOCKER_IMAGE = "yahav12321/k8stest"
+        kubeconfigId = "k8sconfigkube"
+        VERSION = "${env.BUILD_NUMBER}"
     }
     
     stages {
-        stage('Build') {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${GIT_CREDENTIALS}"
+            }
+        }
+        stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image
-                    sh 'docker build -t $DOCKER_IMAGE .'
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                        sh 'docker push $DOCKER_IMAGE'
+                    docker.withRegistry('', 'dockerhub-credentials') {
+                        dockerImage.push()
                     }
                 }
             }
@@ -34,10 +34,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    sh '''
-                    kubectl set image deployment/$KUBERNETES_DEPLOYMENT $KUBERNETES_DEPLOYMENT=$DOCKER_IMAGE --record
-                    kubectl rollout status deployment/$KUBERNETES_DEPLOYMENT
-                    '''
+                    def contextName = sh(script: "kubectl config view --minify --output 'jsonpath={.current-context}'", returnStdout: true).trim()
+                    sh "kubectl config use-context $contextName"
+                    sh "kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
                 }
             }
         }
