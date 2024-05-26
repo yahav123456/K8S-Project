@@ -6,16 +6,29 @@ pipeline {
             kind: Pod
             spec:
               containers:
-              - name: maven
-                image: maven:alpine
-                command:
-                - cat
-                tty: true
+              - name: docker
+                image: docker:20.10.7-dind
+                securityContext:
+                  privileged: true
+                volumeMounts:
+                - name: docker-socket
+                  mountPath: /var/run/docker.sock
+                - name: jenkins-workspace
+                  mountPath: /home/jenkins/agent
               - name: kubectl
                 image: bitnami/kubectl:latest
                 command:
                 - cat
                 tty: true
+                volumeMounts:
+                - name: jenkins-workspace
+                  mountPath: /home/jenkins/agent
+            volumes:
+              - name: docker-socket
+                hostPath:
+                  path: /var/run/docker.sock
+              - name: jenkins-workspace
+                emptyDir: {}
             """
         }
     }
@@ -36,16 +49,20 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
+                container('docker') {
+                    script {
+                        dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
+                    }
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-credentials') {
-                        dockerImage.push()
+                container('docker') {
+                    script {
+                        docker.withRegistry('', 'dockerhub-credentials') {
+                            dockerImage.push()
+                        }
                     }
                 }
             }
