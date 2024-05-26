@@ -3,43 +3,44 @@ pipeline {
         kubernetes {
             label 'jenkins-slave1'
             defaultContainer 'jnlp'
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: kaniko
+    image: 'gcr.io/kaniko-project/executor:latest'
+    command:
+    - /busybox/cat
+    tty: true
+"""
         }
     }
-
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        GIT_CREDENTIALS = 'jenkins-github'
-        DOCKER_IMAGE = "yahav12321/k8stest"
-        KUBERNETES_CONTEXT = "kind-kind"
-        VERSION = "${env.BUILD_NUMBER}"
-        KANIKO_IMAGE = "gcr.io/kaniko-project/executor:v1.6.0"
-    }
-
     stages {
-        stage('Checkout') {
+        stage('Install Kaniko') {
             steps {
-                git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${GIT_CREDENTIALS}"
+                container('jnlp') {
+                    sh '''
+                    curl -LO https://storage.googleapis.com/kaniko-release/release/v1.6.0/kaniko-linux-amd64
+                    chmod +x kaniko-linux-amd64
+                    mv kaniko-linux-amd64 /kaniko/executor
+                    '''
+                }
             }
         }
         stage('Build Docker Image') {
             steps {
-                container('jnlp') {
-                    script {
-                        sh '''
-                        /kaniko/executor --dockerfile=Dockerfile --context=. --destination=${DOCKER_IMAGE}:${VERSION}
-                        '''
-                    }
+                container('kaniko') {
+                    sh '/kaniko/executor --dockerfile=Dockerfile --context=. --destination=yahav12321/k8stest:20'
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
-                container('jnlp') {
-                    script {
-                        sh '''
-                        echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                        docker push ${DOCKER_IMAGE}:${VERSION}
-                        '''
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    container('kaniko') {
+                        sh "echo \${DOCKERHUB_PASSWORD} | docker login --username \${DOCKERHUB_USERNAME} --password-stdin"
+                        sh "docker push yahav12321/k8stest:20"
                     }
                 }
             }
@@ -47,12 +48,7 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 container('jnlp') {
-                    script {
-                        sh '''
-                        kubectl config use-context ${KUBERNETES_CONTEXT}
-                        kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record
-                        '''
-                    }
+                    sh 'kubectl apply -f deployment.yaml'
                 }
             }
         }
