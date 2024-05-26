@@ -3,6 +3,7 @@ pipeline {
     
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        GIT_CREDENTIALS = 'jenkins-github'
         DOCKER_IMAGE = "yahav12321/k8stest"
         KUBERNETES_CONTEXT = "kind-kind"
         VERSION = "${env.BUILD_NUMBER}"
@@ -11,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/yourusername/yourrepository.git'
+                git 'https://github.com/yahav123456/k8s_project.git'
             }
         }
         stage('Build Docker Image') {
