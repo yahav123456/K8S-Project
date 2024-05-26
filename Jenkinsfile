@@ -12,6 +12,7 @@ pipeline {
         DOCKER_IMAGE = "yahav12321/k8stest"
         KUBERNETES_CONTEXT = "kind-kind"
         VERSION = "${env.BUILD_NUMBER}"
+        KANIKO_IMAGE = "gcr.io/kaniko-project/executor:v1.6.0"
     }
 
     stages {
@@ -25,7 +26,7 @@ pipeline {
                 container('jnlp') {
                     script {
                         sh '''
-                        docker build -t ${DOCKER_IMAGE}:${VERSION} .
+                        /kaniko/executor --dockerfile=Dockerfile --context=. --destination=${DOCKER_IMAGE}:${VERSION}
                         '''
                     }
                 }
