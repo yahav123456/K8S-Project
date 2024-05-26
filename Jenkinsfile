@@ -7,18 +7,18 @@ agent {
             spec:
               containers:
               - name: docker
-                image: docker:dind
-                env:
-                - name: DOCKER_HOST
-                  value: tcp://localhost:2375
-                securityContext:
-                  privileged: true
+                image: mikefarah/yq:4.30.8
+                command:
+                - sleep
+                args:
+                - infinity
                 volumeMounts:
-                - name: docker-sock
+                - name: dockersock
                   mountPath: /var/run/docker.sock
               volumes:
-              - name: docker-sock
-                emptyDir: {}
+              - name: dockersock
+                hostPath:
+                  path: /var/run/docker.sock
         '''
     }
 }
