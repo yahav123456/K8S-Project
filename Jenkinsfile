@@ -18,9 +18,7 @@ agent {
                   mountPath: /var/run/docker.sock
               volumes:
               - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
-                  type: File
+                emptyDir: {}
         '''
     }
 }
