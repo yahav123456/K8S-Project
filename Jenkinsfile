@@ -33,10 +33,12 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                script {
-                    sh """
-                    kubectl set image deployment/your-deployment your-container=${DOCKER_IMAGE}:${VERSION} --record
-                    """
+                container('maven') {
+                    script {
+                        sh """
+                        kubectl set image deployment/flask-app kind-control-plane=${DOCKER_IMAGE}:${VERSION} --record
+                        """
+                    }
                 }
             }
         }
