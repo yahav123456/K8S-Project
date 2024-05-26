@@ -1,6 +1,11 @@
 pipeline {
-    agent any
-    
+    agent {
+        kubernetes {
+            label 'jenkins-slave1'
+            defaultContainer 'jnlp'
+        }
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         GIT_CREDENTIALS = 'jenkins-github'
@@ -8,7 +13,7 @@ pipeline {
         KUBERNETES_CONTEXT = "kind-kind"
         VERSION = "${env.BUILD_NUMBER}"
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -17,27 +22,35 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                script {
-                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
+                container('jnlp') {
+                    script {
+                        sh '''
+                        docker build -t ${DOCKER_IMAGE}:${VERSION} .
+                        '''
+                    }
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
-                script {
-                    docker.withRegistry('', 'dockerhub-credentials') {
-                        dockerImage.push()
+                container('jnlp') {
+                    script {
+                        sh '''
+                        echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                        docker push ${DOCKER_IMAGE}:${VERSION}
+                        '''
                     }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                container('maven') {
+                container('jnlp') {
                     script {
-                        sh """
-                        kubectl set image deployment/flask-app kind-control-plane=${DOCKER_IMAGE}:${VERSION} --record
-                        """
+                        sh '''
+                        kubectl config use-context ${KUBERNETES_CONTEXT}
+                        kubectl set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record
+                        '''
                     }
                 }
             }
