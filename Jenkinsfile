@@ -1,54 +1,44 @@
 pipeline {
-    agent {
-        kubernetes {
-            label 'jenkins-slave'
-            defaultContainer 'jnlp'
-            yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-  - name: kaniko
-    image: 'gcr.io/kaniko-project/executor:latest'
-    command:
-    - /busybox/cat
-    tty: true
-"""
-        }
+    agent any
+    
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        GIT_CREDENTIALS = 'jenkins-github'
+        DOCKER_IMAGE = "yahav12321/k8stest"
+        KUBERNETES_CONTEXT = "kind-kind"
+        VERSION = "${env.BUILD_NUMBER}"
     }
+    
     stages {
-        stage('Install Kaniko') {
+        stage('Checkout') {
             steps {
-                container('jnlp') {
-                    sh '''
-                    curl -LO https://storage.googleapis.com/kaniko-release/release/v1.6.0/kaniko-linux-amd64
-                    chmod +x kaniko-linux-amd64
-                    mv kaniko-linux-amd64 /kaniko/executor
-                    '''
-                }
+                git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${GIT_CREDENTIALS}"
             }
         }
         stage('Build Docker Image') {
             steps {
-                container('kaniko') {
-                    sh '/kaniko/executor --dockerfile=Dockerfile --context=. --destination=yahav12321/k8stest:20'
+                script {
+                    dockerImage = docker.build("${DOCKER_IMAGE}:${VERSION}")
                 }
             }
         }
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
-                    container('kaniko') {
-                        sh "echo \${DOCKERHUB_PASSWORD} | docker login --username \${DOCKERHUB_USERNAME} --password-stdin"
-                        sh "docker push yahav12321/k8stest:20"
+                script {
+                    docker.withRegistry('', 'dockerhub-credentials') {
+                        dockerImage.push()
                     }
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                container('jnlp') {
-                    sh 'kubectl apply -f deployment.yaml'
+                container('maven') {
+                    script {
+                        sh """
+                        kubectl set image deployment/flask-app kind-control-plane=${DOCKER_IMAGE}:${VERSION} --record
+                        """
+                    }
                 }
             }
         }
