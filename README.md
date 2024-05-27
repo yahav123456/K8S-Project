@@ -102,7 +102,7 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
     chmod +x ./kubectl
     ```
 
-    - Configured kubeconfig in a `config.yaml` file in GitHub.
+    - Configured kubeconfig using the k8s_file credentials from Jenkins.
 
   ![צילום מסך 2024-05-27 122231](https://github.com/yahav123456/k8s_project/assets/166650066/3d7bb440-f8b3-4b48-92d9-ace136eec102)
    ![צילום מסך 2024-05-26 183637](https://github.com/yahav123456/k8s_project/assets/166650066/59da61ec-b25e-4ae5-9b60-e177c2709ce1)
