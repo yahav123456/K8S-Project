@@ -7,6 +7,7 @@ pipeline {
         DOCKER_IMAGE = "yahav12321/k8stest"
         kubeconfigId = "k8sconfigkube"
         VERSION = "${env.BUILD_NUMBER}"
+        KUBE_CONFIG = readFile('config.yaml')
     }
     
     stages {
