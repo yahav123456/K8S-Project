@@ -7,7 +7,6 @@ pipeline {
         DOCKER_IMAGE = "yahav12321/k8stest"
         kubeconfigId = "k8sconfigkube"
         VERSION = "${env.BUILD_NUMBER}"
-        KUBE_CONFIG = credentials('k8s_file')
     }
     
     stages {
@@ -36,10 +35,17 @@ pipeline {
         }
         
         stage('Deploy to Kubernetes') {
+            environment {
+                KUBECONFIG = credentials('k8s_file')
+            }
             steps {
                 script {
-                    writeFile(file: 'config', text: "${env.KUBE_CONFIG}")
-                    sh "kubectl --kubeconfig=config set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
+                    def deploymentName = "flask-app"
+                    def containerName = "flask-app"
+                    def image = "${DOCKER_IMAGE}:${VERSION}"
+                    def namespace = "default"
+
+                    sh "kubectl set image deployment/${deploymentName} ${containerName}=${image} -n ${namespace} --record"
                 }
             }
         }
