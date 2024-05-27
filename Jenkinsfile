@@ -39,9 +39,10 @@ pipeline {
             steps {
                 script {
                     // Read kubeconfig from Jenkins credentials
-                    def kubeConfigContent = readFile(credentials('k8s_file'))
-                    writeFile(file: 'config', text: kubeConfigContent)
-                    sh "kubectl --kubeconfig=config set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
+                    withCredentials([file(credentialsId: 'k8s_file', variable: 'KUBE_CONFIG')]) {
+                        writeFile(file: 'config', text: env.KUBE_CONFIG)
+                        sh "kubectl --kubeconfig=config set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
+                    }
                 }
             }
         }
