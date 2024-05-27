@@ -57,6 +57,8 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
 4. **Connect Jenkins to GitHub**
     - Configured a GitHub webhook and Jenkins credentials to trigger the pipeline on code changes.
     - Used Ngrok to expose Jenkins to the public for GitHub webhook integration.
+    - **Note that each time Ngrok is restarted, the URL changes, requiring updating the webhook in GitHub accordingly.**
+
 
    ![צילום מסך 2024-05-26 184119](https://github.com/yahav123456/k8s_project/assets/166650066/839869af-ca06-41fa-8ad5-4c4bd51abd5b)
   ![צילום מסך 2024-05-27 102349](https://github.com/yahav123456/k8s_project/assets/166650066/027dbddf-224e-4da4-a1a3-31e3575da0ca)
