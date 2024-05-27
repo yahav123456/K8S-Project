@@ -5,7 +5,6 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         GIT_CREDENTIALS = 'jenkins-github'
         DOCKER_IMAGE = "yahav12321/k8stest"
-        kubeconfigId = "k8sconfigkube"
         VERSION = "${env.BUILD_NUMBER}"
     }
     
