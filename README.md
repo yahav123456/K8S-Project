@@ -23,7 +23,8 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
 
 ## Project Workflow
 
-![287505556-5653c1fa-d537-4f41-9f87-48e130fb0b72](https://github.com/yahav123456/k8s_project/assets/166650066/dfa0d000-b8b9-49bb-b2ab-17c565f8d8ef)
+![1414k8s_](https://github.com/yahav123456/k8s_project/assets/166650066/36e23b15-1957-4698-888e-e6a5841e1713)
+
 
 1. **Setup Kubernetes Cluster**
     - Created a Kubernetes cluster using Kind and configured it with `jenkins-config.yaml`.
