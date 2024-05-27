@@ -36,6 +36,7 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
     kubectl create serviceaccount jenkins --namespace=jenkins
     kubectl -n jenkins create -f jenkins-token.yaml
     kubectl -n jenkins describe secret jenkins-token
+    kubectl create rolebinding jenkins-admin-binding --clusterrole=admin --serviceaccount=jenkins:jenkins --namespace=jenkins
     ```
 
 2. **Run Jenkins Container**
