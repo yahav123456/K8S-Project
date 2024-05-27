@@ -7,7 +7,6 @@ pipeline {
         DOCKER_IMAGE = "yahav12321/k8stest"
         kubeconfigId = "k8sconfigkube"
         VERSION = "${env.BUILD_NUMBER}"
-        KUBE_CONFIG = readFile('config.yaml')
     }
     
     stages {
@@ -35,10 +34,19 @@ pipeline {
             }
         }
         
+        stage('Read config from credentials') {
+            steps {
+                script {
+                    // Reading sensitive content from Jenkins credentials
+                    def configContent = credentials('k8s_github')
+                    writeFile(file: 'config', text: configContent)
+                }
+            }
+        }
+        
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    writeFile(file: 'config', text: "${env.KUBE_CONFIG}")
                     sh "kubectl --kubeconfig=config set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
                 }
             }
