@@ -40,7 +40,7 @@ pipeline {
                 script {
                     // Read kubeconfig from Jenkins credentials
                     withCredentials([file(credentialsId: 'k8s_file', variable: 'KUBE_CONFIG')]) {
-                        writeFile(file: 'config', text: env.KUBE_CONFIG)
+                        withCredentials([file(credentialsId: 'k8s_file', variable: 'KUBE_CONFIG')])
                         sh "cat config" // Print the content of config file
                         sh "kubectl --kubeconfig=config set image deployment/flask-app flask-app=${DOCKER_IMAGE}:${VERSION} --record"
                     }
