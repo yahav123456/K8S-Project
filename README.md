@@ -2,9 +2,6 @@
 
 This project demonstrates the integration between Kubernetes, Jenkins, DockerHub, and GitHub. The goal is to automate the deployment of a simple Flask application using a CI/CD pipeline. When changes are pushed to the `app.py` file on GitHub, Jenkins builds a Docker image, pushes it to DockerHub, and deploys it to a Kubernetes cluster.
 
-## Project Description
-In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The goal is that whenever I modify something in the app.py file (a simple Flask application that generates an HTML page displaying "hello world Yahav"), and push it to GitHub, a predefined trigger activates Jenkins. The Jenkins pipeline, defined in the Jenkinsfile stored in GitHub, retrieves the app.py file, builds it into a Docker image, and push it to DockerHub. Each time, it automatically increments the image version number by 1. Moreover, Jenkins deploys the image to Kubernetes, initiating a deployment process to ensure immediate availability of the application.
-
 ## Plugins Used
 - **Kubernetes CLI Plugin**
 - **Kubernetes Continuous Deploy Plugin**
@@ -28,35 +25,32 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
 
 1. **Setup Kubernetes Cluster**
     - Created a Kubernetes cluster using Kind and configured it with `jenkins-config.yaml`.
-    - Configured namespace, service account, role binding, and token using `jenkins-token.yaml`.
+    - Configured namespace
 
     ```sh
     kind create cluster --config jenkins-config.yaml
     kubectl cluster-info --context kind-kind
     kubectl create namespace jenkins
-    kubectl create serviceaccount jenkins --namespace=jenkins
-    kubectl -n jenkins create -f jenkins-token.yaml
-    kubectl -n jenkins describe secret jenkins-token
-    kubectl create rolebinding jenkins-admin-binding --clusterrole=admin --serviceaccount=jenkins:jenkins --namespace=jenkins
     ```
 
 2. **Run Jenkins Container**
+    - Built a Docker image containing Jenkins with Docker installed inside using a Dockerfile.
     - Started Jenkins container.
 
     ```sh
-    docker run -d -p 8888:8080 -p 50000:50000 --name jenkins jenkins/jenkins:lts
+     docker run -p 9091:8080 -p 50000:50000 --name jenkins myappjenkins 
     ```
 
     ![צילום מסך 2024-05-26 184147](https://github.com/yahav123456/k8s_project/assets/166650066/9fef6449-f04d-4aa2-9abe-b3a5e102584b)
 
 
-3. **Integrate Jenkins with Kubernetes**
-    - Connected Jenkins to Kubernetes by configuring the Kubernetes cloud settings and using the token from the previous step.
+4. **Integrate Jenkins with Kubernetes**
+    - Connected Jenkins to Kubernetes by configuring the Kubernetes cloud settings and using the kubeconfig credentials defined within Jenkins.
 
    ![צילום מסך 2024-05-27 100349](https://github.com/yahav123456/k8s_project/assets/166650066/47aa4b48-3f78-4125-a9e1-e2a9331c9878)
 
 
-4. **Connect Jenkins to GitHub**
+5. **Connect Jenkins to GitHub**
     - Configured a GitHub webhook and Jenkins credentials to trigger the pipeline on code changes.
     - Used Ngrok to expose Jenkins to the public for GitHub webhook integration.
     - **Note that each time Ngrok is restarted, the URL changes, requiring updating the webhook in GitHub accordingly.**
@@ -66,24 +60,24 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
   ![צילום מסך 2024-05-27 102349](https://github.com/yahav123456/k8s_project/assets/166650066/027dbddf-224e-4da4-a1a3-31e3575da0ca)
 
 
-5. **Connect Jenkins to DockerHub**
+6. **Connect Jenkins to DockerHub**
     - Used Jenkins credentials and DockerHub access tokens for image pushing.
   
     
 
-6. **Configure Jenkins Pipeline**
+7. **Configure Jenkins Pipeline**
     - Set up the pipeline to trigger on changes to `app.py` and defined the steps in the `Jenkinsfile`.
 
    ![צילום מסך 2024-05-26 182507](https://github.com/yahav123456/k8s_project/assets/166650066/26eb8e99-6c8d-4771-ae16-a1dc9f4bb783)
 
-7. **Run the Pipeline**
+8. **Run the Pipeline**
     - Initial pipeline run showed Docker commands were not found.
-    - Resolved by installing Docker inside the Jenkins container and starting the Docker daemon.
+    - Resolved by starting the Docker daemon.
 
     ```sh
     apt-get update
     apt-get install sudo -y
-    sudo usermod -aG docker jenkins
+    chown root:docker /var/run/docker.sock
     sudo dockerd --host=unix:///var/run/docker.sock --host=tcp://0.0.0.0:2375 &
     ```
 
@@ -103,12 +97,15 @@ In this project, I integrated Kubernetes, Jenkins, DockerHub, and GitHub. The go
     chmod +x ./kubectl
     ```
 
-    - Configured kubeconfig using the k8s_file credentials from Jenkins.
+    - Configured kubeconfig using the kubeconfig credentials from Jenkins.
 
   ![צילום מסך 2024-05-27 122231](https://github.com/yahav123456/k8s_project/assets/166650066/3d7bb440-f8b3-4b48-92d9-ace136eec102)
    ![צילום מסך 2024-05-26 183637](https://github.com/yahav123456/k8s_project/assets/166650066/59da61ec-b25e-4ae5-9b60-e177c2709ce1)
 
-
+   - I use a simple deployment.yaml file for deploying the application. The deployment.yaml file includes configurations for defining the container's name, deployment 
+     name, and namespace. Following the execution of the pipeline, the existing deployment is deleted, and a new application is created, ensuring a fresh deployment each 
+     time.
+     
 9. **Deployment Verification**
     - Verified the deployment using Lens, ensuring new pods replace the old ones.
 
