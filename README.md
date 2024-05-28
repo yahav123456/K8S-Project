@@ -26,14 +26,15 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
     kind create cluster --config jenkins-config.yaml
     kubectl cluster-info --context kind-kind
     kubectl create namespace jenkins
+    kubectl config set-context --current --namespace=jenkins (to connect the namespace to the cluster)
     ```
 
 2. **Run Jenkins Container**
-    - Built a Docker image containing Jenkins with Docker installed inside using a Dockerfile.
+    - Build a Docker image containing Jenkins with Docker installed inside using a Dockerfile.
     - Started Jenkins container.
 
     ```sh
-     docker run -p 9091:8080 -p 50000:50000 --name jenkins myappjenkins 
+     docker run -p 9091:8080 -p 50000:50000 --name jenkins -v jenkins_home:/var/jenkins_home myappjenkins
     ```
 
     ![צילום מסך 2024-05-26 184147](https://github.com/yahav123456/k8s_project/assets/166650066/9fef6449-f04d-4aa2-9abe-b3a5e102584b)
@@ -47,7 +48,7 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 
 
 5. **Connect Jenkins to GitHub**
-    - Configured a GitHub webhook and Jenkins credentials to trigger the pipeline on code changes.
+    - Set up a GitHub webhook and configured Jenkins credentials to trigger the pipeline upon a commit.
     - Used Ngrok to expose Jenkins to the public for GitHub webhook integration.
     - **Note that each time Ngrok is restarted, the URL changes, requiring updating the webhook in GitHub accordingly.**
 
