@@ -39,10 +39,10 @@ pipeline {
             }
             steps {
                 script {
-                    def deploymentName = "my-deployment"
-                    def containerName = "my-container"
+                    def deploymentName = "flask-app"
+                    def containerName = "flask-app"
                     def image = "${DOCKER_IMAGE}:${VERSION}"
-                    def namespace = "jenkins01"
+                    def namespace = "deafult"
 
                     sh "kubectl set image deployment/${deploymentName} ${containerName}=${image} -n ${namespace} --record"
                 }
