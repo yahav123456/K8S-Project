@@ -42,7 +42,7 @@ pipeline {
                     def deploymentName = "flask-app"
                     def containerName = "flask-app"
                     def image = "${DOCKER_IMAGE}:${VERSION}"
-                    def namespace = "deafult"
+                    def namespace = "default"
 
                     sh "kubectl set image deployment/${deploymentName} ${containerName}=${image} -n ${namespace} --record"
                 }
