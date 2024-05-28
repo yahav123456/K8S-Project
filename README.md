@@ -46,6 +46,7 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 
 4. **Integrate Jenkins with Kubernetes**
     - Connected Jenkins to Kubernetes by configuring the Kubernetes cloud settings and using the kubeconfig credentials defined within Jenkins.
+    - **The kubeconfig file details are located in the .kube directory at the following path: C:/Users/Username/.kube**
 
    ![צילום מסך 2024-05-27 100349](https://github.com/yahav123456/k8s_project/assets/166650066/47aa4b48-3f78-4125-a9e1-e2a9331c9878)
 
@@ -72,7 +73,7 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 
 8. **Run the Pipeline**
     - Initial pipeline run showed Docker commands were not found.
-    - Resolved by starting the Docker daemon.
+    - Resolved by starting the Docker daemon inside the Jenkins container.
 
     ```sh
     apt-get update
@@ -102,9 +103,9 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
   ![צילום מסך 2024-05-27 122231](https://github.com/yahav123456/k8s_project/assets/166650066/3d7bb440-f8b3-4b48-92d9-ace136eec102)
    ![צילום מסך 2024-05-26 183637](https://github.com/yahav123456/k8s_project/assets/166650066/59da61ec-b25e-4ae5-9b60-e177c2709ce1)
 
-   - I use a simple deployment.yaml file for deploying the application. The deployment.yaml file includes configurations for defining the container's name, deployment 
-     name, and namespace. Following the execution of the pipeline, the existing deployment is deleted, and a new application is created, ensuring a fresh deployment each 
-     time.
+   - I utilize a simple deployment.yaml file to deploy a random application. This file contains configurations defining the container's name, deployment name, and 
+     namespace. After the pipeline execution, the existing deployment is deleted, and a new application is created using the Docker image from our DockerHub repository, 
+     ensuring a fresh deployment each time.
      
 9. **Deployment Verification**
     - Verified the deployment using Lens, ensuring new pods replace the old ones.
@@ -118,7 +119,7 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 
 ### Docker Commands Not Found
 - **Issue**: Jenkins container did not recognize Docker commands.
-- **Solution**: Installed Docker Inside the Jenkins container and started the Docker daemon manually.
+- **Solution**: starting the Docker daemon manually.
 
 ### kubectl Commands Not Found
 - **Issue**: Jenkins container did not recognize `kubectl` commands.
