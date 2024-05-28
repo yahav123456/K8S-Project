@@ -62,11 +62,6 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
   
     
 
-7. **Configure Jenkins Pipeline**
-    - Set up the pipeline to trigger on changes to `app.py` and defined the steps in the `Jenkinsfile`.
-
-   ![צילום מסך 2024-05-26 182507](https://github.com/yahav123456/k8s_project/assets/166650066/26eb8e99-6c8d-4771-ae16-a1dc9f4bb783)
-
 8. **Run the Pipeline**
     - Initial pipeline run showed Docker commands were not found.
     - Resolved by starting the Docker daemon inside the Jenkins container.
