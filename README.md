@@ -40,14 +40,14 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
     ![צילום מסך 2024-05-26 184147](https://github.com/yahav123456/k8s_project/assets/166650066/9fef6449-f04d-4aa2-9abe-b3a5e102584b)
 
 
-4. **Integrate Jenkins with Kubernetes**
+3. **Integrate Jenkins with Kubernetes**
     - Connected Jenkins to Kubernetes by configuring the Kubernetes cloud settings and using the kubeconfig credentials defined within Jenkins.
     - **The kubeconfig file details are located in the .kube directory at the following path: C:/Users/Username/.kube**
 
    ![צילום מסך 2024-05-27 100349](https://github.com/yahav123456/k8s_project/assets/166650066/47aa4b48-3f78-4125-a9e1-e2a9331c9878)
 
 
-5. **Connect Jenkins to GitHub**
+4. **Connect Jenkins to GitHub**
     - Set up a GitHub webhook and configured Jenkins credentials to trigger the pipeline upon a commit.
     - Used Ngrok to expose Jenkins to the public for GitHub webhook integration.
     - **Note that each time Ngrok is restarted, the URL changes, requiring updating the webhook in GitHub accordingly.**
@@ -57,12 +57,32 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
   ![צילום מסך 2024-05-27 102349](https://github.com/yahav123456/k8s_project/assets/166650066/027dbddf-224e-4da4-a1a3-31e3575da0ca)
 
 
-6. **Connect Jenkins to DockerHub**
+5. **Connect Jenkins to DockerHub**
     - Used Jenkins credentials and DockerHub access tokens for image pushing.
+      
+
+6. **Configure Jenkins Pipeline**
+   - agent any: This specifies that the pipeline can run on any available Jenkins agent.
+     environment: Defines environment variables for Docker Hub credentials, Git credentials, Docker image name, and the build version.
+
   
+  - stage('Checkout'): Checks out the code from the main branch of the specified GitHub repository using the provided Git credentials.
+
+  
+  - stage('Build Docker Image'): Builds a Docker image from the checked-out code, tagging it with the version number based on the Jenkins build number.
+
+  
+  - stage('Push to DockerHub'): Authenticates with Docker Hub using the provided credentials and pushes the built Docker image to the Docker Hub repository.
+
+  
+  - stage('Deploy to Kubernetes'): Deploys the new Docker image to a Kubernetes cluster.
+    environment: Sets the Kubernetes configuration using the provided credentials.
+    script: Defines deployment details and updates the Kubernetes deployment with the new Docker image version, recording the change.
+
+   ![צילום מסך 2024-05-26 182507](https://github.com/yahav123456/k8s_project/assets/166650066/26eb8e99-6c8d-4771-ae16-a1dc9f4bb783)
     
 
-8. **Run the Pipeline**
+7. **Run the Pipeline**
     - Initial pipeline run showed Docker commands were not found.
     - Resolved by starting the Docker daemon inside the Jenkins container.
 
@@ -120,5 +140,5 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 - **Issue**: Webhook did not work due to Jenkins running on localhost.
 - **Solution**: Used Ngrok to expose Jenkins to the public and allow GitHub to trigger the webhook.
 
-## Conclusion
+## Summary
 The integration of Kubernetes, Jenkins, DockerHub, and GitHub successfully automated the deployment of the Flask application. The CI/CD pipeline ensures that any change in the application code triggers the build, image creation, push to DockerHub, and deployment to Kubernetes automatically.
