@@ -114,7 +114,7 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
   ![צילום מסך 2024-05-27 122231](https://github.com/yahav123456/k8s_project/assets/166650066/3d7bb440-f8b3-4b48-92d9-ace136eec102)
    ![צילום מסך 2024-05-26 183637](https://github.com/yahav123456/k8s_project/assets/166650066/59da61ec-b25e-4ae5-9b60-e177c2709ce1)
 
-   - I utilize a simple deployment.yaml file to deploy a random application. This file contains configurations defining the container's name, deployment name, and 
+   - I utilize a simple `deployment.yaml` file to deploy a random application. This file contains configurations defining the container's name, deployment name, and 
      namespace. After the pipeline execution, the existing deployment is deleted, and a new application is created using the Docker image from our DockerHub repository, 
      ensuring a fresh deployment each time.
      
