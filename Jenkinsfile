@@ -39,8 +39,8 @@ pipeline {
             }
             steps {
                 script {
-                    def deploymentName = "flask-app"
-                    def containerName = "flask-app"
+                    def deploymentName = "my-deployment"
+                    def containerName = "my-container1"
                     def image = "${DOCKER_IMAGE}:${VERSION}"
                     def namespace = "jenkins01"
 
