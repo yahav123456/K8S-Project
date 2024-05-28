@@ -21,7 +21,6 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 
 1. **Setup Kubernetes Cluster**
     - Created a Kubernetes cluster using Kind and configured it with `jenkins-config.yaml`.
-    - Configured namespace
 
     ```sh
     kind create cluster --config jenkins-config.yaml
