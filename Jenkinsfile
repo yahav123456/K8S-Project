@@ -40,7 +40,7 @@ pipeline {
             steps {
                 script {
                     def deploymentName = "my-deployment"
-                    def containerName = "my-container1"
+                    def containerName = "my-container"
                     def image = "${DOCKER_IMAGE}:${VERSION}"
                     def namespace = "jenkins01"
 
