@@ -35,14 +35,14 @@ pipeline {
         
         stage('Deploy to Kubernetes') {
             environment {
-                KUBECONFIG = credentials('k8s_file')
+                KUBECONFIG = credentials('k888s')
             }
             steps {
                 script {
                     def deploymentName = "flask-app"
                     def containerName = "flask-app"
                     def image = "${DOCKER_IMAGE}:${VERSION}"
-                    def namespace = "default"
+                    def namespace = "jenkins01"
 
                     sh "kubectl set image deployment/${deploymentName} ${containerName}=${image} -n ${namespace} --record"
                 }
