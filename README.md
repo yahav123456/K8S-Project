@@ -9,9 +9,8 @@ This project demonstrates the integration between Kubernetes, Jenkins, DockerHub
 - **Kubernetes Plugin**
 - **Docker Plugin**
 - **Docker Commons Plugin**
-- **docker-build-step**
+- **Docker-build-step**
 - **Git Plugin**
-- **GitHub Pipeline for Blue Ocean**
 - **GitHub Plugin**
 - **Blue Ocean**
 
