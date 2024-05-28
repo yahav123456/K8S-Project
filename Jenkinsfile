@@ -35,7 +35,7 @@ pipeline {
         
         stage('Deploy to Kubernetes') {
             environment {
-                KUBECONFIG = credentials('k888s')
+                KUBECONFIG = credentials('k88s')
             }
             steps {
                 script {
