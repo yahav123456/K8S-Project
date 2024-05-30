@@ -8,10 +8,10 @@ spec:
 
   source:
     repoURL: https://github.com/yahav123456/k8s_project.git
-    targetRevision: HEAD
+    targetRevision: main
     path: dev
   destination: 
-    server: https://192.168.56.1:5656
+    server: https://kubernetes.default.svc
     namespace: myapp
 
   syncPolicy:
