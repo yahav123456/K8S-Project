@@ -5,13 +5,22 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         SSH_GITHUB_CREDENTIALS = 'jenkins_ssh_github'
         DOCKER_IMAGE = "yahav12321/k8stest"
-        GITHUB_REPO_CREDENTIALS = credentials('github-repository')
         VERSION = "${env.BUILD_NUMBER}"
     }
 
     stages {
         stage('Checkout') {
             steps {
+                script {
+                    def authorName = sh(
+                        script: "git log -1 --pretty=format:'%an'",
+                        returnStdout: true
+                    ).trim()
+                    if (authorName == "jenkins") {
+                        currentBuild.result = 'SUCCESS'
+                        error "Skipping build due to Jenkins commit"
+                    }
+                }
                 git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${SSH_GITHUB_CREDENTIALS}"
             }
         }
@@ -44,8 +53,8 @@ pipeline {
                     
                     withCredentials([usernamePassword(credentialsId: 'github-repository', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]){
                     sh """
-                        git config user.name 'yahav123456'
-                        git config user.email 'yahavbs100@gmail.com'
+                        git config user.name 'jenkins'
+                        git config user.email 'jenkins@example.com'
                         git add dev/deployment.yaml
                         git commit -m 'Update deployment to ${DOCKER_IMAGE}:${VERSION}'
                         git push https://${USERNAME}:${PASSWORD}@github.com/yahav123456/k8s_project.git main
