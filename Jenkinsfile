@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
-        GIT_CREDENTIALS = 'jenkins-github'
+        SSH_GITHUB_CREDENTIALS = 'jenkins_ssh_github'
         DOCKER_IMAGE = "yahav12321/k8stest"
         VERSION = "${env.BUILD_NUMBER}"
     }
@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${GIT_CREDENTIALS}"
+                git branch: 'main', url: 'https://github.com/yahav123456/k8s_project.git', credentialsId: "${SSH_GITHUB_CREDENTIALS}"
             }
         }
         
