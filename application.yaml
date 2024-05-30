@@ -5,19 +5,20 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   source:
     repoURL: https://github.com/yahav123456/k8s_project.git
     targetRevision: main
     path: dev
   destination: 
-    server: https://kubernetes.default.svc
+    server: https://192.168.56.1:5656
     namespace: myapp
-
   syncPolicy:
-    syncOptions:
-    - CreateNamespace=true
-
     automated:
       selfHeal: true
       prune: true
+    syncOptions:
+      - CreateNamespace=true
+  rbac:
+    defaultPolicy: 'role:admin'
+    policy: |
+      g, system:cluster-admins, role:admin
