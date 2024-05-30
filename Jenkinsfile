@@ -41,13 +41,13 @@ pipeline {
                         sed -i 's|image: ${DOCKER_IMAGE}:.*|image: ${DOCKER_IMAGE}:${VERSION}|' dev/deployment.yaml
                     """
                     
-                    // ביצוע commit ו-push ל-GitHub
+                    // ביצוע commit ו-push ל-GitHub באמצעות SSH
                     sh """
                         git config user.name 'yahav123456'
                         git config user.email 'yahavbs100@gmail.com'
                         git add dev/deployment.yaml
                         git commit -m 'Update deployment to ${DOCKER_IMAGE}:${VERSION}'
-                        git push yahav123456/k8s_project main
+                        git push git@github.com:yahav123456/k8s_project.git main
                     """
                 }
             }
