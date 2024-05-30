@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
+  annotations:
+    argocd-image-updater/image-list: '["docker.io/yahav12321/k8stest"]'
 spec:
   selector:
     matchLabels:
@@ -14,6 +16,6 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: yahav12321/k8stest:97
+        image: yahav12321/k8stest:99
         ports:
         - containerPort: 8080
