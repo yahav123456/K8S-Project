@@ -47,7 +47,7 @@ pipeline {
                         git config user.email 'yahavbs100@gmail.com'
                         git add dev/deployment.yaml
                         git commit -m 'Update deployment to ${DOCKER_IMAGE}:${VERSION}'
-                        git push k8s_project main
+                        git push yahav123456/k8s_project main
                     """
                 }
             }
