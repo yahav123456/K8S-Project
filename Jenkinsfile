@@ -1,13 +1,13 @@
 pipeline {
     agent any
-    
+
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
         GIT_CREDENTIALS = 'jenkins-github'
         DOCKER_IMAGE = "yahav12321/k8stest"
         VERSION = "${env.BUILD_NUMBER}"
     }
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -32,19 +32,23 @@ pipeline {
                 }
             }
         }
-        
-        stage('Deploy to Kubernetes') {
-            environment {
-                KUBECONFIG = credentials('k8s_file')
-            }
+
+        stage('Update Deployment YAML') {
             steps {
                 script {
-                    def deploymentName = "flask-app"
-                    def containerName = "flask-app"
-                    def image = "${DOCKER_IMAGE}:${VERSION}"
-                    def namespace = "default"
-
-                    sh "kubectl set image deployment/${deploymentName} ${containerName}=${image} -n ${namespace} --record"
+                    // עדכון קובץ ה-deployment.yaml עם גרסת ה-Image החדשה
+                    sh """
+                        sed -i 's|image: ${DOCKER_IMAGE}:.*|image: ${DOCKER_IMAGE}:${VERSION}|' dev/deployment.yaml
+                    """
+                    
+                    // ביצוע commit ו-push ל-GitHub
+                    sh """
+                        git config user.name 'jenkins'
+                        git config user.email 'jenkins@example.com'
+                        git add dev/deployment.yaml
+                        git commit -m 'Update deployment to ${DOCKER_IMAGE}:${VERSION}'
+                        git push origin main
+                    """
                 }
             }
         }
