@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: yahav12321/k8stest:126
+        image: yahav12321/k8stest:127
         ports:
         - containerPort: 8080
