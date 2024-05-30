@@ -7,7 +7,7 @@ pipeline {
         DOCKER_IMAGE = "yahav12321/k8stest"
         VERSION = "${env.BUILD_NUMBER}"
         ARGOCD_API_TOKEN = credentials('argocd-api-token')
-        ARGOCD_SERVER_URL = "https://localhost:9090" // החלף עם כתובת ה-URL של ה-Argo CD שלך
+        ARGOCD_SERVER_URL = "(https://kubernetes.default.svc" // החלף עם כתובת ה-URL של ה-Argo CD שלך
     }
     
     stages {
