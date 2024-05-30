@@ -6,8 +6,7 @@ pipeline {
         GIT_CREDENTIALS = 'jenkins-github'
         DOCKER_IMAGE = "yahav12321/k8stest"
         VERSION = "${env.BUILD_NUMBER}"
-        ARGOCD_API_TOKEN = credentials('argocd-api-token')
-        ARGOCD_SERVER_URL = "(https://kubernetes.default.svc" // החלף עם כתובת ה-URL של ה-Argo CD שלך
+        ARGOCD_SERVER_URL = "https://kubernetes.default.svc" // החלף עם כתובת ה-URL של ה-Argo CD שלך
     }
     
     stages {
@@ -37,9 +36,14 @@ pipeline {
 
         stage('Sync Argo CD') {
             steps {
-                script {
-                    def response = sh(script: "curl -X POST -H 'Authorization: Bearer ${ARGOCD_API_TOKEN}' -H 'Content-Type: application/json' -d '{\"revision\": \"HEAD\"}' ${ARGOCD_SERVER_URL}/api/v1/applications/my-app/sync", returnStdout: true)
-                    echo response
+                withCredentials([string(credentialsId: 'argocd-api-token', variable: 'ARGOCD_API_TOKEN')]) {
+                    script {
+                        def response = sh(script: """
+                            curl -X POST -H 'Authorization: Bearer ${ARGOCD_API_TOKEN}' -H 'Content-Type: application/json' \
+                            -d '{\"revision\": \"HEAD\"}' ${ARGOCD_SERVER_URL}/api/v1/applications/my-app/sync
+                        """, returnStdout: true).trim()
+                        echo response
+                    }
                 }
             }
         }
