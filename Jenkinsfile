@@ -6,7 +6,6 @@ pipeline {
         GIT_CREDENTIALS = 'jenkins-github'
         DOCKER_IMAGE = "yahav12321/k8stest"
         VERSION = "${env.BUILD_NUMBER}"
-        ARGOCD_SERVER_URL = "https://kubernetes.default.svc" // החלף עם כתובת ה-URL של ה-Argo CD שלך
     }
     
     stages {
@@ -32,18 +31,20 @@ pipeline {
                     }
                 }
             }
-        } 
-
-        stage('Sync Argo CD') {
+        }
+        
+        stage('Deploy to Kubernetes') {
+            environment {
+                KUBECONFIG = credentials('k8s_file')
+            }
             steps {
-                withCredentials([string(credentialsId: 'argocd-api-token', variable: 'ARGOCD_API_TOKEN')]) {
-                    script {
-                        def response = sh(script: """
-                            curl -X POST -H 'Authorization: Bearer ${ARGOCD_API_TOKEN}' -H 'Content-Type: application/json' \
-                            -d '{\"revision\": \"HEAD\"}' ${ARGOCD_SERVER_URL}/api/v1/applications/my-app/sync
-                        """, returnStdout: true).trim()
-                        echo response
-                    }
+                script {
+                    def deploymentName = "flask-app"
+                    def containerName = "flask-app"
+                    def image = "${DOCKER_IMAGE}:${VERSION}"
+                    def namespace = "default"
+
+                    sh "kubectl set image deployment/${deploymentName} ${containerName}=${image} -n ${namespace} --record"
                 }
             }
         }
