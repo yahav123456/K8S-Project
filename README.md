@@ -11,8 +11,7 @@ This project showcases how Kubernetes, Jenkins, DockerHub, ArgoCD, and GitHub wo
 - **Blue Ocean**
 
 ## Project Workflow
-![_דיאגרמה k8s_](https://github.com/yahav123456/k8s_project/assets/166650066/b532c848-42e6-4163-b11b-0d039622796d)
-
+![_דיאגרמ33ה k8s_](https://github.com/yahav123456/k8s_project/assets/166650066/8792ed2b-d19f-4b52-8719-8b8594cdfe0d)
 
 
 1. **Setup Kubernetes Cluster**
